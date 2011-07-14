@@ -1,0 +1,39 @@
+<html>
+<head>
+<script type="text/javascript" src="jquery-1.6.2.min.js"></script>
+<script type="text/javascript">
+  $(function () {
+
+    $('#start').click(function (event) {
+      var bpm = parseInt($('#bpm').val());
+      console.log(bpm);
+      var intervalWait = (1 / (bpm / 60)) * 1000;
+      console.log("interval = " + intervalWait);
+      var beats = 48;
+      var interval;
+
+      // preload clicks
+      var clicks = [];
+      for (var i = 0; i < beats; i++) {
+        clicks[i] = new Audio('click.ogg');
+        clicks[i].load();
+      }
+
+      interval = setInterval(function () {
+        clicks[beats-1].play();
+        if (beats == 1) {
+          clearInterval(interval);
+        }
+        beats--;
+      }, intervalWait);
+
+      event.preventDefault();
+    });
+  });
+</script>
+</head>
+<body>
+<input id="bpm" value="120" />
+<input id="start" value="Start" type="button" />
+</body>
+</html>
