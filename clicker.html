@@ -6,9 +6,7 @@
 
     $('#start').click(function (event) {
       var bpm = parseInt($('#bpm').val());
-      console.log(bpm);
       var intervalWait = (1 / (bpm / 60)) * 1000;
-      console.log("interval = " + intervalWait);
       var beats = 48;
       var interval;
 
