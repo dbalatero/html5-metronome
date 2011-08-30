@@ -2,36 +2,89 @@
 <head>
 <script type="text/javascript" src="jquery-1.6.2.min.js"></script>
 <script type="text/javascript">
-  $(function () {
+  var Run = function (good, bpm) {
+    return {
+      good: good,
+      bpm: bpm
+    };
+  };
 
+  var maxStreak = 3;
+  var bpmBump = 3;
+  var streak = 0;
+
+  var playSeries = function (bpm, beats) {
+    var originalBeats = beats;
+    var intervalWait = (1 / (bpm / 60)) * 1000;
+    var interval;
+
+    // preload clicks
+    var clicks = [];
+    for (var i = 0; i < beats; i++) {
+      clicks[i] = new Audio('click.ogg');
+      clicks[i].load();
+    }
+
+    interval = setInterval(function () {
+      clicks[beats-1].play();
+      if (beats == 1) {
+        clearInterval(interval);
+
+        var run = new Run(true, bpm);
+        if (confirm("Was that a good run?")) {
+          streak++;
+          if (streak == maxStreak) {
+            bpm += bpmBump;
+            streak = 0;
+          }
+        } else {
+          // reset the streak and try again.
+          streak = 0;
+          run.good = false;
+        }
+
+        // Messaging.
+        $('#streak').html("Streak: " + streak + " of " + maxStreak);
+        $('#bpm').val('' + bpm);
+        $('#history').append($('<li />')
+          .toggleClass('good', run.good)
+          .toggleClass('bad', !run.good)
+          .text("1 run at " + run.bpm + " BPM"));
+
+        playSeries(bpm, originalBeats);
+      }
+      beats--;
+    }, intervalWait);
+  };
+
+  $(function () {
     $('#start').click(function (event) {
       var bpm = parseInt($('#bpm').val());
-      var intervalWait = (1 / (bpm / 60)) * 1000;
-      var beats = 48;
-      var interval;
+      var beats = parseInt($('#beats').val());
 
-      // preload clicks
-      var clicks = [];
-      for (var i = 0; i < beats; i++) {
-        clicks[i] = new Audio('click.ogg');
-        clicks[i].load();
-      }
-
-      interval = setInterval(function () {
-        clicks[beats-1].play();
-        if (beats == 1) {
-          clearInterval(interval);
-        }
-        beats--;
-      }, intervalWait);
+      playSeries(bpm, beats);
 
       event.preventDefault();
     });
   });
 </script>
+<style type="text/css">
+  #history li.good {
+    color: green;
+  }
+
+  #history li.bad {
+    color: red;
+  }
+</style>
 </head>
 <body>
-<input id="bpm" value="120" />
-<input id="start" value="Start" type="button" />
+<input id="bpm" value="120" size="3" /> bpm for
+<input id="beats" value="8" size="3" /> beats.
+<input id="start" value="Start Training" type="button" />
+<div id="streak"></div>
+
+<ul id="history">
+</ul>
 </body>
 </html>
