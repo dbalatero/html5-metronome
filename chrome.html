@@ -2,7 +2,6 @@
 <head>
 <script type="text/javascript">
   var audioContext = new webkitAudioContext();
-  var source = audioContext.createBufferSource();
 
   function handleFileSelect(evt) {
     evt.stopPropagation();
@@ -28,14 +27,15 @@
         };
 
         onSuccess = function (buffer) {
-          console.log("GOT BUFFER");
-          source.buffer = buffer;
-          source.connect(audioContext.destination);
-
-          source.loop = true;
-          source.playbackRate = 0.5;
-
-          source.noteOn(0);
+          var startTime = audioContext.currentTime;
+          var rate = 0.25; // 240bpm
+          var totalBeats = 64;
+          for (i = 0; i < 64; i++) {
+            var source = audioContext.createBufferSource();
+            source.buffer = buffer;
+            source.connect(audioContext.destination);
+            source.noteOn(startTime + (i * rate));
+          }
         };
 
         audioContext.decodeAudioData(event.target.result, onSuccess, onError);
