@@ -1,0 +1,70 @@
+<html>
+<head>
+<script type="text/javascript">
+  var audioContext = new webkitAudioContext();
+  var source = audioContext.createBufferSource();
+
+  function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var files = evt.target.files; // FileList object.
+    console.log(files);
+    console.log(event);
+
+    var f = evt.target.files[0];
+    console.log("Got file", f);
+
+    // files is a FileList of File objects. List some properties.
+    var reader = new FileReader();
+    reader.onload = (function (theFile) {
+      console.log("Closure");
+      return (function (event) {
+        console.log("reader onload callback");
+
+        var onError, onSuccess;
+        onError = function () {
+          alert('Unsupported file format.');
+        };
+
+        onSuccess = function (buffer) {
+          console.log("GOT BUFFER");
+          source.buffer = buffer;
+          source.connect(audioContext.destination);
+
+          source.loop = true;
+          source.playbackRate = 0.5;
+
+          source.noteOn(0);
+        };
+
+        audioContext.decodeAudioData(event.target.result, onSuccess, onError);
+      });
+    })(f);
+
+    reader.onerror = function (event) {
+      console.log("FUCK AN ERROR", event);
+    };
+
+    console.log("reading file ", f, " with ", reader);
+    reader.readAsArrayBuffer(f);
+    console.log("after read fire", reader);
+  }
+
+  function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+  }
+
+  window.onload = function () {
+    // Setup the dnd listeners.
+    console.log("setting up drop zone");
+    var dropZone = document.getElementById('files');
+    dropZone.addEventListener('change', handleFileSelect, false);
+  };
+</script>
+</head>
+<body>
+  <input type="file" id="files" />
+</body>
+</html>
